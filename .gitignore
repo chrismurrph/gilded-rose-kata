@@ -1,2 +1,12 @@
-.idea/workspace.xml
-*.pyc
+/target
+/lib
+/classes
+/checkouts
+/test
+/dev
+*.xml
+*.jar
+*.class
+.lein-deps-sum
+.lein-failures
+.lein-plugins
