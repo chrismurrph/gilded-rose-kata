@@ -1,5 +1,6 @@
 (ns gilded-rose.refactored
-  (:require [gilded-rose.core :as orig]))
+  (:require [gilded-rose.core :as orig]
+            [gilded-rose.utils :as u]))
 
 (def kw->name {:backstage "Backstage passes to a TAFKAL80ETC concert"
                :dexterity "+5 Dexterity Vest"
@@ -16,34 +17,46 @@
             :brie      (kw->item :brie)
             :sulfuras  (kw->item :sulfuras)})
 
+(def appreciating #{(-> items :backstage :name) (-> items :brie :name)})
+(def depreciating #{(-> items :dexterity :name) (-> items :elixir :name)})
+
 (defn name-of [kw]
   (-> items kw :name))
+
+(def inc-quality (u/inc-kw :quality))
+(def dec-quality (u/dec-kw :quality))
+(def zero-quality (u/zero-kw :quality))
+(def dec-sell-in (u/dec-kw :sell-in))
 
 (defn update-quality-new [items]
   (map
     (fn[item] (cond
                 (and (< (:sell-in item) 0) (= (:name item) (name-of :backstage)))
-                (merge item {:quality 0})
-                (or (= (:name item) (name-of :brie)) (= (:name item) (name-of :backstage)))
+                (zero-quality item)
+
+                (appreciating (:name item))
                 (if (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 5) (< (:sell-in item) 10))
-                  (merge item {:quality (inc (inc (:quality item)))})
+                  (inc-quality item 2)
                   (if (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 0) (< (:sell-in item) 5))
-                    (merge item {:quality (inc (inc (inc (:quality item))))})
+                    (inc-quality item 3)
                     (if (< (:quality item) 50)
-                      (merge item {:quality (inc (:quality item))})
+                      (inc-quality item 1)
                       item)))
+
                 (< (:sell-in item) 0)
                 (if (= (name-of :backstage) (:name item))
-                  (merge item {:quality 0})
-                  (if (or (= (name-of :dexterity) (:name item)) (= (name-of :elixir) (:name item)))
-                    (merge item {:quality (- (:quality item) 2)})
+                  (zero-quality item)
+                  (if (depreciating (:name item))
+                    (dec-quality item 2)
                     item))
-                (or (= (name-of :dexterity) (:name item)) (= (name-of :elixir) (:name item)))
-                (merge item {:quality (dec (:quality item))})
+
+                (depreciating (:name item))
+                (dec-quality item 1)
+
                 :else item))
     (map (fn [item]
            (if (not= (name-of :sulfuras) (:name item))
-             (merge item {:sell-in (dec (:sell-in item))})
+             (dec-sell-in item 1)
              item))
          items)))
 
