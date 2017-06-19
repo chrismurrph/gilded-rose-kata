@@ -52,9 +52,6 @@
     (sell-in-is-between? 0 5 item)
     (inc-quality item 3)
 
-    ;(past-use-by? item)
-    ;(zero-quality item)
-
     (< (:quality item) 50)
     (inc-quality item 1)))
 
@@ -75,9 +72,6 @@
 
         (past-use-by? item)
         (cond
-          (= (name-of :backstage) (:name item))
-          (zero-quality item)
-
           (depreciating (:name item))
           (dec-quality item 2)
 
