@@ -28,8 +28,11 @@
 (def zero-quality (u/zero-kw :quality))
 (def dec-sell-in (u/dec-kw :sell-in))
 
+(defn legendary? [{:keys [name]}]
+  (= (name-of :sulfuras) name))
+
 (defn transition-quality [itm]
-  (if (= (name-of :sulfuras) (:name itm))
+  (if (legendary? itm)
     itm
     (let [item (dec-sell-in itm 1)]
       (cond
@@ -45,9 +48,7 @@
           (zero-quality item)
 
           (< (:quality item) 50)
-          (inc-quality item 1)
-
-          :else item)
+          (inc-quality item 1))
 
         (< (:sell-in item) 0)
         (cond
