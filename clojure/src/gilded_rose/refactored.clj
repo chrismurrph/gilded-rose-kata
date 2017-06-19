@@ -35,20 +35,27 @@
                 (zero-quality item)
 
                 (appreciating (:name item))
-                (if (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 5) (< (:sell-in item) 10))
+                (cond
+                  (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 5) (< (:sell-in item) 10))
                   (inc-quality item 2)
-                  (if (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 0) (< (:sell-in item) 5))
-                    (inc-quality item 3)
-                    (if (< (:quality item) 50)
-                      (inc-quality item 1)
-                      item)))
+
+                  (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 0) (< (:sell-in item) 5))
+                  (inc-quality item 3)
+
+                  (< (:quality item) 50)
+                  (inc-quality item 1)
+
+                  :else item)
 
                 (< (:sell-in item) 0)
-                (if (= (name-of :backstage) (:name item))
+                (cond
+                  (= (name-of :backstage) (:name item))
                   (zero-quality item)
-                  (if (depreciating (:name item))
-                    (dec-quality item 2)
-                    item))
+
+                  (depreciating (:name item))
+                  (dec-quality item 2)
+
+                  :else item)
 
                 (depreciating (:name item))
                 (dec-quality item 1)
