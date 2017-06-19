@@ -29,8 +29,17 @@
 (def zero-quality (u/zero-kw :quality))
 (def dec-sell-in (u/dec-kw :sell-in))
 
+(defn past-use-by? [{:keys [sell-in]}]
+  (neg? sell-in))
+
 (defn legendary? [{:keys [name]}]
   (= (name-of :sulfuras) name))
+
+(defn cheese? [item]
+  (simple-appreciating (:name item)))
+
+(defn backstage-pass? [{:keys [name]}]
+  (calibrated-appreciating name))
 
 (defn sell-in-is-between? [lower upper {:keys [sell-in]}]
   (and (>= sell-in lower) (< sell-in upper)))
@@ -43,8 +52,8 @@
     (sell-in-is-between? 0 5 item)
     (inc-quality item 3)
 
-    (< (:sell-in item) 0)
-    (zero-quality item)
+    ;(past-use-by? item)
+    ;(zero-quality item)
 
     (< (:quality item) 50)
     (inc-quality item 1)))
@@ -54,15 +63,17 @@
     itm
     (let [item (dec-sell-in itm 1)]
       (cond
-        (calibrated-appreciating (:name item))
-        (calibrate-appreciation item)
+        (backstage-pass? item)
+        (if (past-use-by? item)
+          (zero-quality item)
+          (calibrate-appreciation item))
 
-        (simple-appreciating (:name item))
+        (cheese? item)
         (cond
           (< (:quality item) 50)
           (inc-quality item 1))
 
-        (< (:sell-in item) 0)
+        (past-use-by? item)
         (cond
           (= (name-of :backstage) (:name item))
           (zero-quality item)
