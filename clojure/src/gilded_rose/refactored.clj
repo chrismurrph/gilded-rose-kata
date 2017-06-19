@@ -69,9 +69,9 @@
           (calibrate-appreciation item))
 
         (cheese? item)
-        (cond
-          (< (:quality item) 50)
-          (inc-quality item 1))
+        (if (< (:quality item) 50)
+          (inc-quality item 1)
+          item)
 
         (superpowers-aid? item)
         (let [dec-quality-by (if (past-use-by? item) 2 1)]
