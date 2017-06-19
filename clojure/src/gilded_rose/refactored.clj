@@ -6,7 +6,8 @@
                :dexterity "+5 Dexterity Vest"
                :elixir    "Elixir of the Mongoose"
                :brie      "Aged Brie"
-               :sulfuras  "Sulfuras, Hand of Ragnaros"})
+               :sulfuras  "Sulfuras, Hand of Ragnaros"
+               :conjured  "Conjured"})
 
 (defn kw->item [kw]
   (first (filter #(= (:name %) (kw kw->name)) orig/start-inventory)))
@@ -15,11 +16,13 @@
             :dexterity (kw->item :dexterity)
             :elixir    (kw->item :elixir)
             :brie      (kw->item :brie)
-            :sulfuras  (kw->item :sulfuras)})
+            :sulfuras  (kw->item :sulfuras)
+            :conjured  (kw->item :conjured)})
 
 (def calibrated-appreciating #{(-> items :backstage :name)})
 (def simple-appreciating #{(-> items :brie :name)})
-(def depreciating #{(-> items :dexterity :name) (-> items :elixir :name)})
+(def depreciating #{(-> items :dexterity :name) (-> items :elixir :name) (-> items :conjured :name)})
+(def double-depreciating #{(-> items :conjured :name)})
 
 (defn name-of [kw]
   (-> items kw :name))
@@ -43,6 +46,9 @@
 
 (defn superpowers-aid? [{:keys [name]}]
   (depreciating name))
+
+(defn conjuring-aid? [{:keys [name]}]
+  (double-depreciating name))
 
 (defn sell-in-is-between? [lower upper {:keys [sell-in]}]
   (and (>= sell-in lower) (< sell-in upper)))
@@ -74,8 +80,10 @@
           item)
 
         (superpowers-aid? item)
-        (let [dec-quality-by (if (past-use-by? item) 2 1)]
-          (dec-quality item dec-quality-by))
+        (let [dec-quality-by (if (past-use-by? item) 2 1)
+              maybe-double-dec-by (cond-> dec-quality-by
+                                          (conjuring-aid? item) (* 2))]
+          (dec-quality item maybe-double-dec-by))
 
         :else item))))
 
