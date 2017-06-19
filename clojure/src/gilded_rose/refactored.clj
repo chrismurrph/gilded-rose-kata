@@ -32,24 +32,30 @@
 (defn legendary? [{:keys [name]}]
   (= (name-of :sulfuras) name))
 
+(defn sell-in-is-between? [lower upper {:keys [sell-in]}]
+  (and (>= sell-in lower) (< sell-in upper)))
+
+(defn calibrate-appreciation [item]
+  (cond
+    (sell-in-is-between? 5 10 item)
+    (inc-quality item 2)
+
+    (sell-in-is-between? 0 5 item)
+    (inc-quality item 3)
+
+    (< (:sell-in item) 0)
+    (zero-quality item)
+
+    (< (:quality item) 50)
+    (inc-quality item 1)))
+
 (defn transition-quality [itm]
   (if (legendary? itm)
     itm
     (let [item (dec-sell-in itm 1)]
       (cond
         (calibrated-appreciating (:name item))
-        (cond
-          (and (>= (:sell-in item) 5) (< (:sell-in item) 10))
-          (inc-quality item 2)
-
-          (and (>= (:sell-in item) 0) (< (:sell-in item) 5))
-          (inc-quality item 3)
-
-          (< (:sell-in item) 0)
-          (zero-quality item)
-
-          (< (:quality item) 50)
-          (inc-quality item 1))
+        (calibrate-appreciation item)
 
         (simple-appreciating (:name item))
         (cond
