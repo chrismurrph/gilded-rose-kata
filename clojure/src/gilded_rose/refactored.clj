@@ -33,9 +33,6 @@
     itm
     (let [item (dec-sell-in itm 1)]
       (cond
-        (and (< (:sell-in item) 0) (= (:name item) (name-of :backstage)))
-        (zero-quality item)
-
         (appreciating (:name item))
         (cond
           (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 5) (< (:sell-in item) 10))
@@ -43,6 +40,9 @@
 
           (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 0) (< (:sell-in item) 5))
           (inc-quality item 3)
+
+          (and (< (:sell-in item) 0) (= (:name item) (name-of :backstage)))
+          (zero-quality item)
 
           (< (:quality item) 50)
           (inc-quality item 1)
