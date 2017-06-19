@@ -17,7 +17,8 @@
             :brie      (kw->item :brie)
             :sulfuras  (kw->item :sulfuras)})
 
-(def appreciating #{(-> items :backstage :name) (-> items :brie :name)})
+(def calibrated-appreciating #{(-> items :backstage :name)})
+(def simple-appreciating #{(-> items :brie :name)})
 (def depreciating #{(-> items :dexterity :name) (-> items :elixir :name)})
 
 (defn name-of [kw]
@@ -36,17 +37,22 @@
     itm
     (let [item (dec-sell-in itm 1)]
       (cond
-        (appreciating (:name item))
+        (calibrated-appreciating (:name item))
         (cond
-          (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 5) (< (:sell-in item) 10))
+          (and (>= (:sell-in item) 5) (< (:sell-in item) 10))
           (inc-quality item 2)
 
-          (and (= (:name item) (name-of :backstage)) (>= (:sell-in item) 0) (< (:sell-in item) 5))
+          (and (>= (:sell-in item) 0) (< (:sell-in item) 5))
           (inc-quality item 3)
 
-          (and (< (:sell-in item) 0) (= (:name item) (name-of :backstage)))
+          (< (:sell-in item) 0)
           (zero-quality item)
 
+          (< (:quality item) 50)
+          (inc-quality item 1))
+
+        (simple-appreciating (:name item))
+        (cond
           (< (:quality item) 50)
           (inc-quality item 1))
 
