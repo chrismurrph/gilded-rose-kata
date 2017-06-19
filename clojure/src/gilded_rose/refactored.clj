@@ -41,6 +41,9 @@
 (defn backstage-pass? [{:keys [name]}]
   (calibrated-appreciating name))
 
+(defn superpowers-aid? [{:keys [name]}]
+  (depreciating name))
+
 (defn sell-in-is-between? [lower upper {:keys [sell-in]}]
   (and (>= sell-in lower) (< sell-in upper)))
 
@@ -70,15 +73,9 @@
           (< (:quality item) 50)
           (inc-quality item 1))
 
-        (past-use-by? item)
-        (cond
-          (depreciating (:name item))
-          (dec-quality item 2)
-
-          :else item)
-
-        (depreciating (:name item))
-        (dec-quality item 1)
+        (superpowers-aid? item)
+        (let [dec-quality-by (if (past-use-by? item) 2 1)]
+          (dec-quality item dec-quality-by))
 
         :else item))))
 
