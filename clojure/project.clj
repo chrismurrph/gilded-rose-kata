@@ -7,4 +7,4 @@
                  [org.clojure/tools.namespace "0.2.11"]]
   :plugins [[speclj "3.3.2"]]
   :main gilded-rose.core
-  :test-paths ["dev" "src"])
+  :test-paths ["dev" "src" "test"])

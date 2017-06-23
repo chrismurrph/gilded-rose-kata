@@ -7,10 +7,11 @@
                :elixir    "Elixir of the Mongoose"
                :brie      "Aged Brie"
                :sulfuras  "Sulfuras, Hand of Ragnaros"
+               ;; Can always keep as won't be asked for if not included
                :conjured  "Conjured"})
 
 (defn kw->item [kw]
-  (first (filter #(= (:name %) (kw kw->name)) orig/start-inventory)))
+  (first (filter #(= (:name %) (kw kw->name)) (orig/start-inventory true))))
 
 (def items {:backstage (kw->item :backstage)
             :dexterity (kw->item :dexterity)
@@ -64,7 +65,7 @@
     (< (:quality item) 50)
     (inc-quality item 1)))
 
-(defn transition-quality [itm]
+(defn transition-quality [include-enhance? itm]
   (if (legendary? itm)
     itm
     (let [item (dec-sell-in itm 1)]
@@ -82,19 +83,10 @@
         (superpowers-aid? item)
         (let [dec-quality-by (if (past-use-by? item) 2 1)
               maybe-double-dec-by (cond-> dec-quality-by
-                                          (conjuring-aid? item) (* 2))]
+                                          (and include-enhance? (conjuring-aid? item)) (* 2))]
           (dec-quality item maybe-double-dec-by))
 
         :else item))))
 
-(defn update-quality-new [items]
-  (map transition-quality items))
-
-;;
-;; Switch on and off, depending whether want to to use the original or my refactored update-quality function
-;;
-(def use-refactored? true)
-
-(def update-quality-fn (if use-refactored?
-                         update-quality-new
-                         orig/update-quality))
+(defn update-quality-new [include-enhance? items]
+  (map (partial transition-quality include-enhance?) items))
